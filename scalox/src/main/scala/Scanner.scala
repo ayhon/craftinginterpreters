@@ -4,21 +4,21 @@ import TokenType._
 
 private val keywords = Map[String,TokenType](
   "and" -> AND,
-  "class" -> AND,
-  "else" -> AND,
-  "false" -> AND,
-  "for" -> AND,
-  "fun" -> AND,
-  "if" -> AND,
-  "nil" -> AND,
-  "or" -> AND,
-  "print" -> AND,
-  "return" -> AND,
-  "super" -> AND,
-  "this" -> AND,
-  "true" -> AND,
-  "var" -> AND,
-  "while" -> AND,
+  "class" -> CLASS,
+  "else" -> ELSE,
+  "false" -> FALSE,
+  "for" -> FOR,
+  "fun" -> FUN,
+  "if" -> IF,
+  "nil" -> NIL,
+  "or" -> OR,
+  "print" -> PRINT,
+  "return" -> RETURN,
+  "super" -> SUPER,
+  "this" -> THIS,
+  "true" -> TRUE,
+  "var" -> VAR,
+  "while" -> WHILE,
 )
 
 case class Scanner(val source: String):
@@ -61,7 +61,7 @@ case class Scanner(val source: String):
         while peek() != '\n' && !isAtEnd do advance()
       else
         addToken(SLASH)
-    case '\r'|'\t' => ()
+    case ' '|'\r'|'\t' => () // Ignore whitespace
     case '\n' => line += 1;
     case '\"' => string()
     case num if isDigit(num) => number()
@@ -78,8 +78,9 @@ case class Scanner(val source: String):
   def peek() = if isAtEnd then 0.toChar else source.charAt(current)
   def peekNext() = if (current +1 >= source.length) then 0.toChar else source.charAt(current+1)
   def advance() = 
+    val character = peek()
     current+=1
-    peek()
+    character
 
   def addToken(kind: TokenType, literal: Any = null) =
     val text = source.substring(start, current)

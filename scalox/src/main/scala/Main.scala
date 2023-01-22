@@ -24,15 +24,19 @@ object Lox:
     val input: InputStreamReader = new InputStreamReader(System.in)
     val reader: BufferedReader = new BufferedReader(input)
     
+    print("> ")
     var line = reader.readLine()
     while line != null do
       run(line)
       Lox.hadError = false
+      print("> ")
+      line = reader.readLine()
 
   def run(source: String) =
     val scanner: Scanner = new Scanner(source)
     val tokens: Array[Token] = scanner.scanTokens()
 
+    // println(source)
     for token <- tokens do
       println(token)
 
