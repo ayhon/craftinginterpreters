@@ -1,7 +1,7 @@
 package lox
 
 enum Token2(val lexeme: String, val literal: Any, val line: Int):
-  override def toString: String = s"${this.productPrefix.toUpperCase} $lexeme $literal"
+  override def toString: String = s"$lexeme\t${this.productPrefix}\t${if literal == null then "" else literal}"
 
   // Single character tokens
   case LeftParen(ln: Int)                       extends Token2("(", null, ln)
