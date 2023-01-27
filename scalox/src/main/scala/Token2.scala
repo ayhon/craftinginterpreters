@@ -1,16 +1,18 @@
 package lox
 
 enum Token2(val lexeme: String, val literal: Any, val line: Int):
+  override def toString: String = s"${this.productPrefix.toUpperCase} $lexeme $literal"
+
   // Single character tokens
   case LeftParen(ln: Int)                       extends Token2("(", null, ln)
   case RightParen(ln: Int)                      extends Token2(")", null, ln)
-  case LeftBrace(ln: Int)                      extends Token2("{", null, ln)
-  case RightBrace(ln: Int)                     extends Token2("}", null, ln)
+  case LeftBrace(ln: Int)                       extends Token2("{", null, ln)
+  case RightBrace(ln: Int)                      extends Token2("}", null, ln)
   case Comma(ln: Int)                           extends Token2(",", null ,ln)
   case Dot(ln: Int)                             extends Token2(".", null ,ln)
   case Minus(ln: Int)                           extends Token2("-", null ,ln)
   case Plus(ln: Int)                            extends Token2("+", null ,ln)
-  case Semicolon(ln: Int)                       extends Token2(":", null ,ln)
+  case Semicolon(ln: Int)                       extends Token2(";", null ,ln)
   case Slash(ln: Int)                           extends Token2("/", null ,ln)
   case Star(ln: Int)                            extends Token2("*", null ,ln)
  
@@ -49,6 +51,3 @@ enum Token2(val lexeme: String, val literal: Any, val line: Int):
   
 
   case EndOfFile(ln: Int)                       extends Token2("", null, ln)
-
-
-

@@ -38,29 +38,29 @@ case class Scanner2(val source: String):
   def isAtEnd: Boolean = current >= source.length
 
   def scanToken() = advance() match
-    case '(' => LeftParen(line)
-    case ')' => RightParen(line)
-    case '{' => LeftBrace(line)
-    case '}' => RightBrace(line)
-    case ',' => Comma(line)
-    case '.' => Dot(line)
-    case '-' => Minus(line)
-    case '+' => Plus(line)
-    case ';' => Semicolon(line)
-    case '*' => Star(line)
-    case '!' => if matches('=')
-                then BangEqual(line) else Bang(line)
-    case '=' => if matches('=')
-                then EqualEqual(line) else Equal(line)
-    case '<' => if matches('=')
-                then LessEqual(line) else Less(line)
-    case '>' => if matches('=')
-                then GreaterEqual(line) else Greater(line)
+    case '(' => tokens :+= LeftParen(line)
+    case ')' => tokens :+= RightParen(line)
+    case '{' => tokens :+= LeftBrace(line)
+    case '}' => tokens :+= RightBrace(line)
+    case ',' => tokens :+= Comma(line)
+    case '.' => tokens :+= Dot(line)
+    case '-' => tokens :+= Minus(line)
+    case '+' => tokens :+= Plus(line)
+    case ';' => tokens :+= Semicolon(line)
+    case '*' => tokens :+= Star(line)
+    case '!' => tokens :+= (if matches('=')
+                           then BangEqual(line) else Bang(line))
+    case '=' => tokens :+= (if matches('=')
+                           then EqualEqual(line) else Equal(line))
+    case '<' => tokens :+= (if matches('=')
+                           then LessEqual(line) else Less(line))
+    case '>' => tokens :+= (if matches('=')
+                           then GreaterEqual(line) else Greater(line))
     case '/' => 
       if matches('/') then 
         while peek() != '\n' && !isAtEnd do advance()
       else
-        Slash(line)
+        tokens :+= Slash(line)
     case ' '|'\r'|'\t' => () // Ignore whitespace
     case '\n' => line += 1;
     case '\"' => string()
@@ -82,7 +82,7 @@ case class Scanner2(val source: String):
     current+=1
     character
 
-  def getText() = source.substring(start, current)
+  def getText(): String = source.substring(start, current)
 
   def string() =
     while !isAtEnd && peek() != '\"' do
@@ -96,7 +96,7 @@ case class Scanner2(val source: String):
       advance()
       // Trim surrounding quotes
       val value = source.substring(start+1,current-1)
-      String_(getText(), value, line)
+      tokens :+= String_(getText(), value, line)
 
   def isDigit(c: Char): Boolean = c.isDigit
   def number() =
@@ -104,14 +104,13 @@ case class Scanner2(val source: String):
     if peek() == '.' && isDigit(peekNext()) then
       advance()
       while isDigit(peek()) do advance()
-    Number_(getText(), getText().toDouble, line)
+    tokens :+= Number_(getText(), getText().toDouble, line)
     
 
   def isAlpha(c: Char): Boolean = c.isUpper || c.isLower || c == '_'
   def isAlphaNumeric(c: Char): Boolean = isAlpha(c) || isDigit(c)
   def identifier() =
     while isAlphaNumeric(peek()) do advance()
-    val text = source.substring(start, current)
-    keywords.get(text) match 
-      case Some(token) => token(line)
-      case None => Identifier(getText(), line)
+    lox.keywords.get(getText()) match 
+      case Some(token) => tokens :+= token(line)
+      case None =>        tokens :+= Identifier(getText(), line)

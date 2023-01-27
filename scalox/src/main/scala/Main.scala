@@ -33,8 +33,8 @@ object Lox:
       line = reader.readLine()
 
   def run(source: String) =
-    val scanner: Scanner = new Scanner(source)
-    val tokens: Array[Token] = scanner.scanTokens()
+    val scanner: Scanner2 = new Scanner2(source)
+    val tokens: Array[Token2] = scanner.scanTokens()
 
     // println(source)
     for token <- tokens do
