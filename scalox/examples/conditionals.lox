@@ -1,0 +1,6 @@
+if (10 <= 20) {
+	print "All's good";
+}
+else {
+	print "Wait, how did this happen?";
+}

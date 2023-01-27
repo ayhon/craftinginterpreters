@@ -1,0 +1,4 @@
+fun printSum(a, b) {
+  var result = a + b; // Adds both numbers together
+  print return;       // Prints the result
+}

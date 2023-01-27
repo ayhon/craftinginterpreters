@@ -5,7 +5,5 @@ case class Token( kind: TokenType,
                   literal: Any,
                   line: Int
                 ):
-  def useless = 1
   override def toString: String = s"$kind $lexeme $literal"
-
 
