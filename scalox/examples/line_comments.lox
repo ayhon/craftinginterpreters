@@ -1,4 +1,5 @@
-fun printSum(a, b) {
-  var result = a + b; // Adds both numbers together
-  print return;       // Prints the result
-}
+// This is just a comment,
+// it should be ignored
+// ... Wait, only by the
+// interpreter though
+
