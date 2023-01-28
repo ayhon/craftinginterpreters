@@ -2,7 +2,7 @@ package lox
 
 import Token2._
 
-val keywords = Map[String,Int => Token2](
+private val my_keywords = Map[String,Int => Token2](
   "and"    -> And.apply,
   "class"  -> Class.apply,
   "else"   -> Else.apply,
@@ -111,6 +111,6 @@ case class Scanner2(val source: String):
   def isAlphaNumeric(c: Char): Boolean = isAlpha(c) || isDigit(c)
   def identifier() =
     while isAlphaNumeric(peek()) do advance()
-    lox.keywords.get(getText()) match 
+    my_keywords.get(getText()) match 
       case Some(token) => tokens :+= token(line)
       case None =>        tokens :+= Identifier(getText(), line)

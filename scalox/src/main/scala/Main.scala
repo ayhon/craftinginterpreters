@@ -33,16 +33,22 @@ object Lox:
       line = reader.readLine()
 
   def run(source: String) =
-    val scanner: Scanner2 = new Scanner2(source)
-    val tokens: Array[Token2] = scanner.scanTokens()
+    val scanner = Scanner2(source)
+    val tokens = scanner.scanTokens()
+    val parser = Parser(tokens)
+    parser.parse() match
+      case Some(expression) => println(expression)
+      case None => ()
 
-    // println(source)
-    for token <- tokens do
-      println(token)
-
-  def error(line: Int, message: String) =
-    report(line, "", message)
-  
   def report(line: Int, where: String, what: String) =
     println(s"[ line $line ] Error${where}: $what")
     Lox.hadError = true
+
+  def error(line: Int, message: String) =
+    report(line, "", message)
+
+  def error(token: Token2, message: String) = 
+    val where = token match
+      case Token2.EndOfFile(_) => " at end"
+      case _ => s" at '${token.lexeme}'"
+    report(token.line, where, message)
