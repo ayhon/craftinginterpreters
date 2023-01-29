@@ -48,6 +48,8 @@ case class Scanner2(val source: String):
     case '+' => tokens :+= Plus(line)
     case ';' => tokens :+= Semicolon(line)
     case '*' => tokens :+= Star(line)
+    case '?' => tokens :+= Question(line)
+    case ':' => tokens :+= Colon(line)
     case '!' => tokens :+= (if matches('=')
                            then BangEqual(line) else Bang(line))
     case '=' => tokens :+= (if matches('=')

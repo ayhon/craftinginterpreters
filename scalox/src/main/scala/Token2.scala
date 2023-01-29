@@ -15,6 +15,8 @@ enum Token2(val lexeme: String, val literal: Any, val line: Int):
   case Semicolon(ln: Int)                       extends Token2(";", null ,ln)
   case Slash(ln: Int)                           extends Token2("/", null ,ln)
   case Star(ln: Int)                            extends Token2("*", null ,ln)
+  case Question(ln: Int)                        extends Token2("?", null ,ln)
+  case Colon(ln: Int)                           extends Token2(":", null ,ln)
  
   // One or two character tokens
   case Bang(ln: Int)                            extends Token2("!",  null ,ln)

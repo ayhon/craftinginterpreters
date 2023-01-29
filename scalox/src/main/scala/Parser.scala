@@ -24,8 +24,10 @@ class Parser(private val tokens: Array[Token2]):
     previous()
 
   // Parsing states
-  def expression(): Expr = equality()
+  def expression(): Expr = operation(Precedence.top)
+  // def expression(): Expr = equality()
 
+  /*
   def equality(): Expr = // comparison ( ("!=" | "==") comparison )*
     @tailrec def continued(left: Expr): Expr = peek() match
         case BangEqual(_) | EqualEqual(_) =>
@@ -64,21 +66,69 @@ class Parser(private val tokens: Array[Token2]):
         continued(Binary(left, operator, right))
       case _ => left
     continued(unary())
+  // */
 
-  /*
-  // Idea: Abstract away the fixity of an operator, as a property of the operator
-  def fixity(token: Token2): Int = ???
-  def binop(fix: Int): Expr = // binop(N) = binop(N-1) ( tokens_with_fix(N) binop(N-1) )*
-    @tailrec def continued(left: Expr): Expr = fixity(peek()) match
-      case fix => 
+  // /*
+  // Idea: Abstract away the precedence of an operator, as a property of the operator
+  enum Precedence:
+    case SeqPoint
+    case TertiaryConditional
+    case Equality
+    case Comparison
+    case Term
+    case Factor
+    case Unary
+    case Primary
+
+    def lower: Precedence = 
+      val lower_ordinal = this.ordinal + 1
+      val max_ordinal = Precedence.values.length
+      Precedence.fromOrdinal(lower_ordinal min max_ordinal)
+
+  object Precedence:
+    val top = Precedence.fromOrdinal(0)
+
+  def precedence(token: Token2): Precedence = token match
+    case Comma(_) => Precedence.SeqPoint
+    case Question(_) => Precedence.TertiaryConditional
+    case BangEqual(_) | EqualEqual(_) => Precedence.Equality
+    case Greater(_) |GreaterEqual(_)
+         |Less(_) |LessEqual(_) => Precedence.Comparison
+    case Plus(_) | Minus(_) => Precedence.Term
+    case Slash(_) | Star(_) => Precedence.Factor
+    case _ => Precedence.Unary
+
+  def operation(prec: Precedence): Expr = prec match
+    case Precedence.TertiaryConditional => tertiary(prec)
+    case Precedence.Unary => unary()
+    case Precedence.Primary => primary()
+    case _ => binary(prec)
+
+  // To decouple this implementation from the tertiary conditional operator, 
+  // we should have a function that matches the first part of a tertiary operator
+  // with the possible continuations
+  def tertiary(prec: Precedence): Expr = // equality ( '?' equality ':' expresion )
+    val condition = operation(prec.lower)
+    peek() match
+      case Question(_) =>
+        advance()
+        val left = operation(prec.lower)
+        peek() match
+          case Colon(_) => advance()
+          case _ => throw Parser.error(peek(), "Expect ':' in tertiary operator")
+        val right = operation(prec.lower)
+        Tertiary(condition,left,right)
+      case _ => condition
+
+  def binary(prec: Precedence): Expr = // binary(n) = operation(n-1) ( token_with_prec(n) operation(n-1) )*
+    @tailrec def continued(left: Expr): Expr =
+      if precedence(peek()) == prec then
         val operator = advance()
-        val right = binop(fix-1)
+        val right = operation(prec.lower)
         continued(Binary(left, operator, right))
-      case _ => left
-    if fix == 0 then
-      primary()
-    else continued(binop(fix-1))
-  */
+      else left
+    continued(operation(prec.lower))
+  // */
 
   def unary(): Expr = peek() match // ("!" | "-") unary | primary
     case Bang(_) | Minus(_) =>
