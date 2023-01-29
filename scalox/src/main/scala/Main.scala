@@ -35,6 +35,7 @@ object Lox:
   def run(source: String) =
     val scanner = Scanner2(source)
     val tokens = scanner.scanTokens()
+    for token <- tokens do println(token)
     val parser = Parser(tokens)
     parser.parse() match
       case Some(expression) => println(expression)

@@ -76,12 +76,27 @@ for(var i = 0; i < 10; i = i + 1) {
       "}\tRightBrace",
       "\tEndOfFile"
     )
-    val scanner: Scanner2 = new Scanner2(source)
+    val scanner: Scanner2 = Scanner2(source)
     val tokens: Array[Token2] = scanner.scanTokens()
 
     // println(source)
     var s = scala.collection.mutable.StringBuilder()
     for (token, expect) <- tokens.zip(expected) do
       assertNoDiff(token.toString, expect.toString)
+  }
+  test("Parsing works for expressions") {
+    val source = """
+    "a" == "b" + 30 - 10 * (--!-!-!true + 4 / (1 + -2) )
+    """
+    val scanner: Scanner2 = Scanner2(source)
+    val tokens: Array[Token2] = scanner.scanTokens()
+    val parser = Parser(tokens)
+    parser.parse() match
+      case Some(expr) => 
+        assertNoDiff(
+          expr.toString,
+          "(== a (- (+ b 30.0) (* 10.0 (group (+ (- (- (! (- (! (- (! true))))))) (/ 4.0 (group (+ 1.0 (- 2.0)))))))))"
+        )
+      case None => fail("Couldn't parse expression")
   }
 }

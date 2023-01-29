@@ -26,7 +26,7 @@ class Parser(private val tokens: Array[Token2]):
   // Parsing states
   def expression(): Expr = equality()
 
-  def equality(): Expr =
+  def equality(): Expr = // comparison ( ("!=" | "==") comparison )*
     @tailrec def continued(left: Expr): Expr = peek() match
         case BangEqual(_) | EqualEqual(_) =>
           val operator = advance()
@@ -34,7 +34,8 @@ class Parser(private val tokens: Array[Token2]):
           continued(Binary(left, operator, right))
         case _ => left
     continued(comparison())
-  def comparison(): Expr =
+
+  def comparison(): Expr = // term ( (">" | "<" | ">=" | "<=") term)*
     @tailrec def continued(left: Expr): Expr = peek() match
       case Greater(_)
           |GreaterEqual(_)
@@ -46,7 +47,16 @@ class Parser(private val tokens: Array[Token2]):
       case _ => left
     continued(term())
 
-  def term(): Expr = 
+  def term(): Expr = // factor ( ("+" | "-") factor)*
+    @tailrec def continued(left: Expr): Expr = peek() match
+      case Plus(_) | Minus(_) =>
+        val operator = advance()
+        val right = factor()
+        continued(Binary(left, operator, right))
+      case _ => left
+    continued(factor())
+
+  def factor(): Expr = // unary ( ("/" | "*") unary)*
     @tailrec def continued(left: Expr): Expr = peek() match
       case Slash(_) | Star(_) =>
         val operator = advance()
@@ -55,7 +65,22 @@ class Parser(private val tokens: Array[Token2]):
       case _ => left
     continued(unary())
 
-  def unary(): Expr = peek() match
+  /*
+  // Idea: Abstract away the fixity of an operator, as a property of the operator
+  def fixity(token: Token2): Int = ???
+  def binop(fix: Int): Expr = // binop(N) = binop(N-1) ( tokens_with_fix(N) binop(N-1) )*
+    @tailrec def continued(left: Expr): Expr = fixity(peek()) match
+      case fix => 
+        val operator = advance()
+        val right = binop(fix-1)
+        continued(Binary(left, operator, right))
+      case _ => left
+    if fix == 0 then
+      primary()
+    else continued(binop(fix-1))
+  */
+
+  def unary(): Expr = peek() match // ("!" | "-") unary | primary
     case Bang(_) | Minus(_) =>
       val operator = advance()
       val right = unary()
@@ -71,6 +96,7 @@ class Parser(private val tokens: Array[Token2]):
            val primary = advance()
            Literal(primary.literal)
     case LeftParen(_) =>
+      advance()
       val expr = expression()
       peek() match
         case RightParen(_) => advance()
